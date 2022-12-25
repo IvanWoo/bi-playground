@@ -1,0 +1,7 @@
+global:
+  postgresql:
+    auth:
+      postgresPassword: bi_password
+      database: bi
+      username: bi_user
+      password: bi_password
