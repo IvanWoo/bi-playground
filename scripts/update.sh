@@ -5,7 +5,11 @@ BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="${BASE_DIR}/.."
 README_FILE="${REPO_DIR}/README.md"
 UP_FILE="${REPO_DIR}/scripts/up.sh"
+UP_REDASH_FILE="${REPO_DIR}/scripts/up_redash.sh"
+UP_SUPERSET_FILE="${REPO_DIR}/scripts/up_superset.sh"
 DOWN_FILE="${REPO_DIR}/scripts/down.sh"
+DOWN_REDASH_FILE="${REPO_DIR}/scripts/down_redash.sh"
+DOWN_SUPERSET_FILE="${REPO_DIR}/scripts/down_superset.sh"
 
 reset_out_file() {
     local OUT_FILE=$1
@@ -30,6 +34,14 @@ update_up() {
     echo ")" >>$OUT_FILE
 }
 
+update_up_redash() {
+    cat $UP_FILE | sed '/superset/d' >$UP_REDASH_FILE
+}
+
+update_up_superset() {
+    cat $UP_FILE | sed '/redash/d' >$UP_SUPERSET_FILE
+}
+
 update_down() {
     local OUT_FILE=$DOWN_FILE
     reset_out_file ${OUT_FILE}
@@ -38,11 +50,27 @@ update_down() {
     echo ")" >>$OUT_FILE
 }
 
+update_down_redash() {
+    cat $DOWN_FILE | sed '/superset/d' >$DOWN_REDASH_FILE
+}
+
+update_down_superset() {
+    cat $DOWN_FILE | sed '/redash/d' >$DOWN_SUPERSET_FILE
+}
+
 main() {
     echo "Updating $UP_FILE"
     update_up
+    echo "Updating $UP_REDASH_FILE"
+    update_up_redash
+    echo "Updating $UP_SUPERSET_FILE"
+    update_up_superset
     echo "Updating $DOWN_FILE"
     update_down
+    echo "Updating $DOWN_REDASH_FILE"
+    update_down_redash
+    echo "Updating $DOWN_SUPERSET_FILE"
+    update_down_superset
 }
 
 main

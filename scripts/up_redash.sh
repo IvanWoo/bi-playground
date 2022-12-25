@@ -8,8 +8,6 @@ cd ${REPO_DIR}
 kubectl create namespace bi --dry-run=client -o yaml | kubectl apply -f -
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add redash https://getredash.github.io/contrib-helm-chart/
-helm repo add superset https://apache.github.io/superset
 helm upgrade --install bi-postgresql bitnami/postgresql -n bi -f postgresql/values.yaml
 helm upgrade --install bi-redash redash/redash -f redash/values.yaml -n bi
-helm upgrade --install bi-superset superset/superset -f superset/values.yaml -n bi
 )

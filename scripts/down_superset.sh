@@ -5,7 +5,6 @@ BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="${BASE_DIR}/.."
 (
 cd ${REPO_DIR}
-helm uninstall bi-redash -n bi
 helm uninstall bi-superset -n bi
 helm uninstall bi-postgresql -n bi
 kubectl delete pvc --all -n bi

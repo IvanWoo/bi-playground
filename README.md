@@ -12,11 +12,13 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy al
   - [postgresql](#postgresql)
     - [load data from sqlite to psql](#load-data-from-sqlite-to-psql)
   - [redash](#redash)
+  - [superset](#superset)
 - [explore](#explore)
   - [redash](#redash-1)
-  - [features](#features)
     - [parameterized query](#parameterized-query)
     - [dashboard based on queries](#dashboard-based-on-queries)
+  - [superset](#superset-1)
+    - [create the connection from web ui](#create-the-connection-from-web-ui)
 - [cleanup](#cleanup)
 - [references](#references)
 
@@ -101,6 +103,18 @@ helm repo add redash https://getredash.github.io/contrib-helm-chart/
 helm upgrade --install bi-redash redash/redash -f redash/values.yaml -n bi
 ```
 
+### superset
+
+follow the [official helm chart](https://superset.apache.org/docs/installation/running-on-kubernetes/) to deploy Redash
+
+```sh
+helm repo add superset https://apache.github.io/superset
+```
+
+```sh
+helm upgrade --install bi-superset superset/superset -f superset/values.yaml -n bi
+```
+
 ## explore
 
 ### redash
@@ -115,8 +129,6 @@ create the admin user and organization
 - FIXME: create the user using `manage.py`
   - `./manage.py users create_root admin@example.com admin --password=admin_password --org default`
   - `sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not connect to server: No such file or directory`
-
-### features
 
 #### parameterized query
 
@@ -137,12 +149,33 @@ AND REF_DATE BETWEEN '{{ REF_DATE.start }}' AND '{{ REF_DATE.end}}'
 
 ![redash dashboard](assets/redash_dashboard.png)
 
+### superset
+
+```sh
+kubectl port-forward svc/bi-superset -n bi 8088:8088
+```
+
+- FIXME: lost connection
+  - `E1225 18:33:45.746629   82460 portforward.go:406] an error occurred forwarding 8088 -> 8088: error forwarding port 8088 to pod 78d8fb8629c8ab4dc2baa54d14207d413094f45c96de2378811cf54862124671, uid : failed to execute portforward in network namespace "/var/run/netns/cni-3e90f492-496d-9f08-9e0f-6b0a5d1e1008": readfrom tcp4 127.0.0.1:59662->127.0.0.1:8088: write tcp4 127.0.0.1:59662->127.0.0.1:8088: write: broken pipe`
+
+login with the default confidential
+
+```sh
+user: admin
+password: admin
+```
+
+#### create the connection from web ui
+
+![superset connection](assets/superset_connection.png)
+
 ## cleanup
 
 tl;dr: `./scripts/down.sh`
 
 ```sh
 helm uninstall bi-redash -n bi
+helm uninstall bi-superset -n bi
 helm uninstall bi-postgresql -n bi
 kubectl delete pvc --all -n bi
 kubectl delete namespace bi
