@@ -3,6 +3,7 @@
 explore different data viz solution for Business intelligence (BI)
 
 - [Redash](https://redash.io): acquired by Databricks in 2020
+- [Apache Superset](https://superset.apache.org)
 
 In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy all components.
 
@@ -19,15 +20,16 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy al
     - [dashboard based on queries](#dashboard-based-on-queries)
   - [superset](#superset-1)
     - [create the connection from web ui](#create-the-connection-from-web-ui)
+    - [dashboard with filters](#dashboard-with-filters)
 - [cleanup](#cleanup)
 - [references](#references)
 
 ## prerequisites
 
-- [Rancher Desktop](https://github.com/rancher-sandbox/rancher-desktop): `1.4.1`
-- Kubernetes: `v1.24.3`
-- kubectl `v1.23.3`
-- Helm: `v3.9.0`
+- [Rancher Desktop](https://github.com/rancher-sandbox/rancher-desktop): `1.7.0`
+- Kubernetes: `v1.25.4`
+- kubectl `v1.26.0`
+- Helm: `v3.10.2`
 
 ## setup
 
@@ -105,15 +107,18 @@ helm upgrade --install bi-redash redash/redash -f redash/values.yaml -n bi
 
 ### superset
 
-follow the [official helm chart](https://superset.apache.org/docs/installation/running-on-kubernetes/) to deploy Redash
+use the docker-compose to deploy superset due to the technical issue with the helm chart of Superset
 
 ```sh
-helm repo add superset https://apache.github.io/superset
+git clone --depth=1 https://github.com/apache/superset.git
+cd superset
+nerdctl compose -f docker-compose-non-dev.yml up -d
 ```
 
-```sh
-helm upgrade --install bi-superset superset/superset -f superset/values.yaml -n bi
-```
+FIXME: follow the [official helm chart](https://superset.apache.org/docs/installation/running-on-kubernetes/) to deploy Superset
+
+- lost connection after port-forwarding
+  - `E1225 18:33:45.746629   82460 portforward.go:406] an error occurred forwarding 8088 -> 8088: error forwarding port 8088 to pod 78d8fb8629c8ab4dc2baa54d14207d413094f45c96de2378811cf54862124671, uid : failed to execute portforward in network namespace "/var/run/netns/cni-3e90f492-496d-9f08-9e0f-6b0a5d1e1008": readfrom tcp4 127.0.0.1:59662->127.0.0.1:8088: write tcp4 127.0.0.1:59662->127.0.0.1:8088: write: broken pipe`
 
 ## explore
 
@@ -151,12 +156,7 @@ AND REF_DATE BETWEEN '{{ REF_DATE.start }}' AND '{{ REF_DATE.end}}'
 
 ### superset
 
-```sh
-kubectl port-forward svc/bi-superset -n bi 8088:8088
-```
-
-- FIXME: lost connection
-  - `E1225 18:33:45.746629   82460 portforward.go:406] an error occurred forwarding 8088 -> 8088: error forwarding port 8088 to pod 78d8fb8629c8ab4dc2baa54d14207d413094f45c96de2378811cf54862124671, uid : failed to execute portforward in network namespace "/var/run/netns/cni-3e90f492-496d-9f08-9e0f-6b0a5d1e1008": readfrom tcp4 127.0.0.1:59662->127.0.0.1:8088: write tcp4 127.0.0.1:59662->127.0.0.1:8088: write: broken pipe`
+visit http://localhost:8088 for the superset web ui
 
 login with the default confidential
 
@@ -167,7 +167,19 @@ password: admin
 
 #### create the connection from web ui
 
+in order to connect with the psql instance on kubernetes
+
+```sh
+kubectl port-forward svc/bi-postgresql -n bi 5432:5432
+```
+
+`192.168.5.2` is the equivalent `host.docker.internal` based on [this discussion](https://github.com/containerd/nerdctl/issues/747)
+
 ![superset connection](assets/superset_connection.png)
+
+#### dashboard with filters
+
+![superset dashboard](./assets/superset_dashboard.png)
 
 ## cleanup
 
@@ -175,7 +187,6 @@ tl;dr: `./scripts/down.sh`
 
 ```sh
 helm uninstall bi-redash -n bi
-helm uninstall bi-superset -n bi
 helm uninstall bi-postgresql -n bi
 kubectl delete pvc --all -n bi
 kubectl delete namespace bi

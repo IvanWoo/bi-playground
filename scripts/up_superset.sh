@@ -7,7 +7,5 @@ REPO_DIR="${BASE_DIR}/.."
 cd ${REPO_DIR}
 kubectl create namespace bi --dry-run=client -o yaml | kubectl apply -f -
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add superset https://apache.github.io/superset
 helm upgrade --install bi-postgresql bitnami/postgresql -n bi -f postgresql/values.yaml
-helm upgrade --install bi-superset superset/superset -f superset/values.yaml -n bi
 )
