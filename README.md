@@ -4,6 +4,7 @@ explore different data viz solution for Business intelligence (BI)
 
 - [Redash](https://redash.io): acquired by Databricks in 2020
 - [Apache Superset](https://superset.apache.org)
+- [Metabase](https://www.metabase.com)
 
 In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy all components.
 
@@ -14,6 +15,7 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy al
     - [load data from sqlite to psql](#load-data-from-sqlite-to-psql)
   - [redash](#redash)
   - [superset](#superset)
+  - [metabase](#metabase)
 - [explore](#explore)
   - [redash](#redash-1)
     - [parameterized query](#parameterized-query)
@@ -119,6 +121,10 @@ FIXME: follow the [official helm chart](https://superset.apache.org/docs/install
 
 - lost connection after port-forwarding
   - `E1225 18:33:45.746629   82460 portforward.go:406] an error occurred forwarding 8088 -> 8088: error forwarding port 8088 to pod 78d8fb8629c8ab4dc2baa54d14207d413094f45c96de2378811cf54862124671, uid : failed to execute portforward in network namespace "/var/run/netns/cni-3e90f492-496d-9f08-9e0f-6b0a5d1e1008": readfrom tcp4 127.0.0.1:59662->127.0.0.1:8088: write tcp4 127.0.0.1:59662->127.0.0.1:8088: write: broken pipe`
+
+### metabase
+
+TODO: there is [no official arm64 image](https://github.com/metabase/metabase/issues/13119) of metabase and the [official helm chart is pending](https://github.com/metabase/metabase/pull/16603)
 
 ## explore
 

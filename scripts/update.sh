@@ -7,9 +7,11 @@ README_FILE="${REPO_DIR}/README.md"
 UP_FILE="${REPO_DIR}/scripts/up.sh"
 UP_REDASH_FILE="${REPO_DIR}/scripts/up_redash.sh"
 UP_SUPERSET_FILE="${REPO_DIR}/scripts/up_superset.sh"
+UP_METABASE_FILE="${REPO_DIR}/scripts/up_metabase.sh"
 DOWN_FILE="${REPO_DIR}/scripts/down.sh"
 DOWN_REDASH_FILE="${REPO_DIR}/scripts/down_redash.sh"
 DOWN_SUPERSET_FILE="${REPO_DIR}/scripts/down_superset.sh"
+DOWN_METABASE_FILE="${REPO_DIR}/scripts/down_metabase.sh"
 
 reset_out_file() {
     local OUT_FILE=$1
@@ -35,11 +37,15 @@ update_up() {
 }
 
 update_up_redash() {
-    cat $UP_FILE | sed '/superset/d' >$UP_REDASH_FILE
+    cat $UP_FILE | sed '/superset/d' | sed '/metabase/d' >$UP_REDASH_FILE
 }
 
 update_up_superset() {
-    cat $UP_FILE | sed '/redash/d' >$UP_SUPERSET_FILE
+    cat $UP_FILE | sed '/redash/d' | sed '/metabase/d' >$UP_SUPERSET_FILE
+}
+
+update_up_metabase() {
+    cat $UP_FILE | sed '/redash/d' | sed '/superset/d' >$UP_METABASE_FILE
 }
 
 update_down() {
@@ -51,11 +57,15 @@ update_down() {
 }
 
 update_down_redash() {
-    cat $DOWN_FILE | sed '/superset/d' >$DOWN_REDASH_FILE
+    cat $DOWN_FILE | sed '/superset/d' | sed '/metabase/d' >$DOWN_REDASH_FILE
 }
 
 update_down_superset() {
-    cat $DOWN_FILE | sed '/redash/d' >$DOWN_SUPERSET_FILE
+    cat $DOWN_FILE | sed '/redash/d' | sed '/metabase/d' >$DOWN_SUPERSET_FILE
+}
+
+update_down_metabase() {
+    cat $DOWN_FILE | sed '/redash/d' | sed '/superset/d' >$DOWN_METABASE_FILE
 }
 
 main() {
@@ -65,12 +75,16 @@ main() {
     update_up_redash
     echo "Updating $UP_SUPERSET_FILE"
     update_up_superset
-    echo "Updating $DOWN_FILE"
+    echo "Updating $UP_METABASE_FILE"
+    update_up_metabase
+
     update_down
     echo "Updating $DOWN_REDASH_FILE"
     update_down_redash
     echo "Updating $DOWN_SUPERSET_FILE"
     update_down_superset
+    echo "Updating $DOWN_METABASE_FILE"
+    update_down_metabase
 }
 
 main
