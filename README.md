@@ -23,6 +23,10 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy al
   - [superset](#superset-1)
     - [create the connection from web ui](#create-the-connection-from-web-ui)
     - [dashboard with filters](#dashboard-with-filters)
+  - [metabase](#metabase-1)
+    - [create the connection from web ui](#create-the-connection-from-web-ui-1)
+    - [parameterized query](#parameterized-query-1)
+    - [dashboard with filters](#dashboard-with-filters-1)
 - [cleanup](#cleanup)
 - [references](#references)
 
@@ -124,7 +128,13 @@ FIXME: follow the [official helm chart](https://superset.apache.org/docs/install
 
 ### metabase
 
-TODO: there is [no official arm64 image](https://github.com/metabase/metabase/issues/13119) of metabase and the [official helm chart is pending](https://github.com/metabase/metabase/pull/16603)
+use the docker-compose to deploy metabase because [the official helm chart is pending](https://github.com/metabase/metabase/pull/16603)
+
+```sh
+nerdctl compose -f metabase/docker-compose.yml up -d
+```
+
+TODO: there is [no official arm64 image](https://github.com/metabase/metabase/issues/13119) of metabase
 
 ## explore
 
@@ -186,6 +196,53 @@ kubectl port-forward svc/bi-postgresql -n bi 5432:5432
 #### dashboard with filters
 
 ![superset dashboard](./assets/superset_dashboard.png)
+
+### metabase
+
+visit http://localhost:3000 for the metabase web ui
+
+create the admin user for the first time
+
+#### create the connection from web ui
+
+in order to connect with the psql instance on kubernetes
+
+```sh
+kubectl port-forward svc/bi-postgresql -n bi 5432:5432
+```
+
+`192.168.5.2` is the equivalent `host.docker.internal` based on [this discussion](https://github.com/containerd/nerdctl/issues/747)
+
+![metabase connection](./assets/metabase_connection.png)
+
+#### parameterized query
+
+```sql
+SELECT
+  REF_DATE,
+  GEO,
+  INDEX_TYPE,
+  MAX(VALUE) AS VALUE -- dummy aggregate func
+FROM new_housing_price_index
+wHERE TRUE
+AND REF_DATE >= {{ref_date_start}} -- variable type date
+AND REF_DATE <= {{ref_date_end}} -- variable type date
+AND {{index_type}} -- variable type field filter
+AND {{geos}} -- variable type field filter
+GROUP BY 1, 2, 3
+```
+
+**caveats**:
+
+- hard-coded row limit: [2,000 unaggregated, 10,000 aggregated](https://discourse.metabase.com/t/how-can-i-change-default-row-limits-currently-its-2000/10707/2)
+  - that's why we use the dummy aggregate func in the above sql
+  - this is not configurable, you have to [build your own binary](https://github.com/CDCgov/prime-reportstream/issues/4308) in order to tweak this
+
+![metabase query](./assets/metabase_query.png)
+
+#### dashboard with filters
+
+![metabase dashboard](./assets/metabase_dashboard.png)
 
 ## cleanup
 
